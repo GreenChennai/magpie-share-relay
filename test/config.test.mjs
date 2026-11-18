@@ -56,3 +56,9 @@ test("a publicURL whose host is not a DNS name is refused", () => {
   expect(normalizeConfig({ publicURL: "https://us.cyanai.eu.cc/magpie" }).publicURL)
     .toBe("https://us.cyanai.eu.cc/magpie");
 });
+
+test("an explicit ssh binary is kept", () => {
+  const cfg = normalizeConfig({ ssh: { bin: "D:\\Tools\\ssh.exe" } });
+  expect(cfg.ssh.bin).toBe("D:\\Tools\\ssh.exe");
+  expect(() => normalizeConfig({ ssh: { bin: 42 } })).toThrow();
+});

@@ -176,8 +176,12 @@
     if (entry.error) return `用量未读取（${entry.error}）`;
     const left = [];
     if (entry.costLeft !== null && entry.costLeft !== undefined) left.push(`剩余 $${entry.costLeft}`);
-    if (entry.tokensLeft !== null && entry.tokensLeft !== undefined) left.push(`剩余 ${entry.tokensLeft} tokens`);
-    return left.length ? left.join(" · ") : "限额已用完";
+    if (entry.tokensLeft !== null && entry.tokensLeft !== undefined && entry.tokensLeft > 0) {
+      left.push(`剩余 ${entry.tokensLeft} tokens`);
+    }
+    if (left.length) return left.join(" · ");
+    if (entry.costLeft === 0 || (entry.costLeft === null && entry.tokensLeft === 0)) return "限额已用完";
+    return entry.limited ? "已设限额" : "未设限额";
   }
 
   function fmtAgo(ms) {

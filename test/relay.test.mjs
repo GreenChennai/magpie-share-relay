@@ -207,3 +207,19 @@ test("two failed probes degrade, one success recovers", async () => {
   await timers.shift().fn();
   expect(relay.status().state).toBe("up");
 });
+
+test("a spawn error backs off instead of crashing the host", () => {
+  const timers = [];
+  let child;
+  const relay = createRelay({
+    args: ["ssh"], spawn: () => (child = new FakeChild()), log: silent,
+    schedule: (ms, fn) => { timers.push({ ms, fn }); return timers.length; }, clear: () => {},
+    delays: [5],
+  });
+  relay.start();
+  child.emit("error", Object.assign(new Error('Executable not found in $PATH: "ssh"'), { code: "ENOENT" }));
+  expect(relay.status().state).toBe("backoff");
+  expect(relay.status().lastError).toContain("Executable not found");
+  expect(relay.status().attempts).toBe(1);
+  expect(timers.at(-1).ms).toBe(5000);
+});

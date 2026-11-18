@@ -39,6 +39,7 @@ test("stderr maps to an actionable kind", () => {
   expect(classifyStderr("administratively prohibited").kind).toBe("forwarding_disabled");
   expect(classifyStderr("Host key verification failed.").kind).toBe("host_key");
   expect(classifyStderr("Could not resolve hostname").kind).toBe("dns");
+  expect(classifyStderr("Executable not found in $PATH: \"ssh\"").kind).toBe("ssh-missing");
 });
 
 test("the authorize command carries the public key once", () => {

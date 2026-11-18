@@ -35,6 +35,8 @@ magpie plugin add github:GreenChennai/magpie-share-relay
 3. 预览并应用 nginx 配置。失败会自动回滚。
 4. 启动隧道，创建朋友 key，把页面给出的地址和 key 发给朋友。
 
+Windows 上如果页面提示找不到 `ssh`，把配置里的 `ssh.bin` 设成 Git 自带 `ssh.exe` 的完整路径（例如 `D:\Git\usr\bin\ssh.exe`）。
+
 朋友在另一个 Magpie 里接入时：
 
 ```bash

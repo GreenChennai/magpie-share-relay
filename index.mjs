@@ -98,7 +98,7 @@ async function prepareTunnel(state) {
   }
 
   const args = buildTunnelArgs({
-    ssh: { ...ssh, bin: findBinary("ssh") },
+    ssh: { ...ssh, bin: ssh.bin || findBinary("ssh") },
     remotePort: state.config.remotePort,
     lanIP: checked.lanIP,
     gatewayPort: checked.gatewayPort,
@@ -383,7 +383,7 @@ export default {
               config,
               log,
               runRemote: (script, timeoutMs) => runRemote({
-                ssh: { ...config.ssh, bin: findBinary("ssh") },
+                ssh: { ...config.ssh, bin: config.ssh?.bin || findBinary("ssh") },
                 keyPath,
                 knownHostsPath: paths.knownHostsPath,
                 script,

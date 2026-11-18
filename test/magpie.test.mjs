@@ -2,7 +2,7 @@ import { test, expect } from "bun:test";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { parseKeyList, parseSecret, createMagpie, findMagpie, maskSecret } from "../lib/magpie.mjs";
+import { parseKeyList, parseSecret, createMagpie, findMagpie, maskSecret, limitState } from "../lib/magpie.mjs";
 
 const table = `ID                        NAME             STATE    GATEWAY KEY            LIMIT  MODELS  ACCOUNTS  ACCESS
 3229851908b3f48f1b68924e  share-alice-7f3a enabled  masked-key-a3c1  -      all     all       full
@@ -108,4 +108,32 @@ test("findMagpie prefers the .com shim beside a parent .exe", async () => {
     return { code: 1, stdout: "", stderr: "" };
   };
   expect(await findMagpie({ configured: "", ppid: 1234, run, platform: "win32" })).toBe(com);
+});
+
+test("the gateway limit payload is nested under limit", () => {
+  const nested = {
+    limited: true,
+    limit: {
+      period: "day",
+      reset: "2026-11-19T00:00:00+08:00",
+      tokensLeft: 0,
+      costLeft: 5,
+    },
+  };
+  expect(limitState(nested)).toEqual({
+    limited: true,
+    period: "day",
+    reset: "2026-11-19T00:00:00+08:00",
+    tokensLeft: 0,
+    costLeft: 5,
+  });
+  expect(limitState({ limited: true, period: "week", costLeft: 2 }))
+    .toMatchObject({ limited: true, period: "week", costLeft: 2 });
+  expect(limitState({})).toEqual({
+    limited: null,
+    period: "",
+    reset: "",
+    tokensLeft: null,
+    costLeft: null,
+  });
 });
