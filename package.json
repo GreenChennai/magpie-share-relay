@@ -1,0 +1,50 @@
+{
+  "name": "magpie-share-relay",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./index.mjs",
+  "files": ["index.mjs", "lib", "page", "ui", "README.md"],
+  "scripts": { "test": "bun test" },
+  "license": "MIT",
+  "keywords": ["magpie-plugin", "remote-magpie", "ssh-tunnel", "share"],
+  "engines": { "magpie": ">=0.1.4000" },
+  "magpie": {
+    "name": "Share relay",
+    "summary": {
+      "en": "Share this magpie with friends through a reverse SSH tunnel to your own server: one OpenAI/Anthropic API link and one Remote magpie link, both behind gateway keys.",
+      "zh": "通过到自有服务器的 SSH 反向隧道把本机 magpie 分享给朋友：一条 OpenAI/Anthropic API 直连，一条 Remote magpie 接入，均由 gateway key 控制。"
+    },
+    "page": {
+      "title": "Share",
+      "titles": { "zh": "共享", "zh-TW": "共享", "ja": "共有" },
+      "file": "page/index.html",
+      "icon": "page/icon.svg",
+      "service": { "port": 3488, "option": "port" }
+    },
+    "options": {
+      "port": 3488,
+      "version": 1,
+      "enabled": false,
+      "autoStart": true,
+      "publicURL": "https://us.cyanai.eu.cc/magpie",
+      "remotePort": 13425,
+      "ssh": {
+        "host": "us.cyanai.eu.cc",
+        "port": 22,
+        "user": "root",
+        "keyPath": "",
+        "fingerprint": "",
+        "sudo": "auto"
+      },
+      "gatewayPort": 0,
+      "lanIP": "",
+      "magpieBin": "",
+      "nginx": {
+        "configRoot": "/etc/nginx",
+        "snippetPath": "/etc/nginx/snippets/magpie-share.conf",
+        "lastAppliedAt": ""
+      },
+      "invites": []
+    }
+  }
+}

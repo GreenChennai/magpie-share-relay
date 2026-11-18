@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Share relay</title>
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>共享</h1>
+    <p class="hint" id="public-label">正在读取…</p>
+    <p class="error small" id="config-warning" hidden></p>
+  </div>
+  <div class="top-status">
+    <span class="dot" id="top-dot"></span>
+    <span id="top-status">读取中</span>
+  </div>
+</header>
+
+<main class="grid">
+  <section class="card" id="status">
+    <div class="section-head">
+      <h2>状态</h2>
+      <div class="actions">
+        <button type="button" id="stop-relay">停止</button>
+        <button type="button" id="diagnose-btn">诊断</button>
+      </div>
+    </div>
+    <p class="state-line"><span class="dot" id="relay-dot"></span><strong id="relay-title">正在读取…</strong></p>
+    <p class="muted small" id="relay-detail">—</p>
+    <p class="muted small" id="relay-note" hidden>重连会中断正在进行的流式请求；客户端需要重试。</p>
+    <dl class="facts">
+      <div><dt>SSH</dt><dd id="ssh-uptime">—</dd></div>
+      <div><dt>公网自检</dt><dd id="public-check">—</dd></div>
+      <div><dt>服务端口</dt><dd id="service-port">—</dd></div>
+      <div><dt>本机地址</dt><dd id="lan-ip">—</dd></div>
+    </dl>
+  </section>
+
+  <section class="card" id="setup">
+    <div class="section-head"><h2>首次设置</h2><span class="muted small" id="setup-progress"></span></div>
+    <ol class="steps">
+      <li id="step-share"><span class="tick" data-tick>?</span>
+        <div><strong>打开 magpie 的 Share on local network</strong>
+          <p class="muted small" id="step-share-note">在 magpie 的 Settings → Network and sharing 打开。</p>
+        </div>
+      </li>
+      <li id="step-key"><span class="tick" data-tick>?</span>
+        <div>
+          <strong>授权本机公钥到 RN</strong>
+          <div class="actions"><button type="button" id="copy-authorize">复制命令</button></div>
+          <pre class="code small" id="authorize-command">—</pre>
+          <pre class="code small muted" id="ssh-public-key">—</pre>
+        </div>
+      </li>
+      <li id="step-nginx"><span class="tick" data-tick>?</span>
+        <div>
+          <strong>写入 RN 的 nginx 配置</strong>
+          <div class="actions">
+            <button type="button" id="preview-nginx">预览</button>
+            <button type="button" id="apply-nginx">应用</button>
+          </div>
+          <pre class="code small" id="nginx-preview" hidden></pre>
+          <p class="muted small" id="nginx-note">应用前会先备份并跑 nginx -t，失败自动回滚。</p>
+        </div>
+      </li>
+      <li id="step-tunnel"><span class="tick" data-tick>?</span>
+        <div>
+          <strong>启动隧道</strong>
+          <div class="actions"><button type="button" id="start-relay">启动</button></div>
+        </div>
+      </li>
+    </ol>
+    <p class="error small" id="setup-error" hidden></p>
+  </section>
+
+  <section class="card" id="friends">
+    <div class="section-head">
+      <h2>朋友</h2>
+      <button type="button" id="new-friend">新建朋友</button>
+    </div>
+    <form class="form" id="new-friend-form" hidden>
+      <input id="friend-name" placeholder="名字，如 Alice" autocomplete="off" required>
+      <label class="small">限额
+        <input id="friend-cost" type="number" min="0" step="0.5" value="5" inputmode="decimal">
+      </label>
+      <select id="friend-period" aria-label="限额周期">
+        <option value="day">每天</option>
+        <option value="week">每周</option>
+        <option value="month">每月</option>
+      </select>
+      <button type="submit">创建</button>
+      <button type="button" id="cancel-friend" class="ghost">取消</button>
+    </form>
+    <div class="list" id="friends-list"><p class="muted">正在读取…</p></div>
+    <p class="muted small" id="friends-note"></p>
+  </section>
+
+  <section class="card" id="links">
+    <div class="section-head">
+      <h2>链接</h2>
+      <span class="muted small" id="links-friend">未选择朋友</span>
+    </div>
+    <div id="links-body" class="muted">选择一位朋友的“复制两条链接”，或点名字查看。</div>
+    <div id="links-content" hidden>
+      <dl class="links">
+        <div><dt>OpenAI</dt><dd><code id="link-openai">—</code> <button type="button" data-copy="link-openai">复制</button></dd></div>
+        <div><dt>Anthropic</dt><dd><code id="link-anthropic">—</code> <button type="button" data-copy="link-anthropic">复制</button></dd></div>
+        <div><dt>Remote magpie</dt><dd><code id="link-remote">—</code> <button type="button" data-copy="link-remote">复制</button></dd></div>
+        <div><dt>Key</dt><dd><code id="link-secret">—</code>
+          <button type="button" id="reveal-link-secret">显示</button>
+          <button type="button" id="copy-link-secret">复制</button>
+        </dd></div>
+      </dl>
+      <div class="actions">
+        <button type="button" id="copy-links">复制两条链接和 key</button>
+        <button type="button" id="refresh-usage">刷新用量</button>
+      </div>
+      <h3>Claude Code</h3>
+      <pre class="code" id="claude-env"></pre>
+      <h3>curl</h3>
+      <pre class="code" id="curl-example"></pre>
+      <h3>Remote magpie</h3>
+      <pre class="code" id="remote-command"></pre>
+    </div>
+  </section>
+
+  <section class="card wide" id="logs">
+    <div class="section-head">
+      <h2>最近日志（脱敏）</h2>
+      <button type="button" id="copy-logs">复制</button>
+    </div>
+    <pre class="code log" id="log-list">正在读取…</pre>
+  </section>
+
+  <section class="card wide" id="diagnose">
+    <div class="section-head">
+      <h2>诊断</h2>
+      <button type="button" id="diagnose-run">重新诊断</button>
+    </div>
+    <div class="list" id="diagnose-list"><p class="muted">点“诊断”运行全部检查。</p></div>
+  </section>
+</main>
+
+<p class="toast" id="toast" hidden></p>
+<script src="./app.js"></script>
+</body>
+</html>
