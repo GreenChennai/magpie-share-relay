@@ -111,6 +111,26 @@ h3 { font-size: .9rem; margin: 1rem 0 .4rem; color: var(--muted); }
   margin-bottom: .7rem;
 }
 
+details.card > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+details.card > summary::-webkit-details-marker { display: none; }
+details.card > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+details.card:not([open]) > summary { margin-bottom: 0; }
+.summary-meta { display: inline-flex; align-items: center; gap: .5rem; }
+.chevron {
+  width: .45rem;
+  height: .45rem;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  margin-top: -.2rem;
+  transition: transform .15s;
+}
+details.card[open] > summary .chevron { transform: rotate(225deg); margin-top: .2rem; }
+
 .actions { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
 .state-line { display: flex; align-items: center; gap: .5rem; margin: .2rem 0 .3rem; }
 

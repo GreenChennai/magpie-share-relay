@@ -11,6 +11,7 @@
   let diagnose = null;
   let logs = [];
   let pending = false;
+  let lastSetupDone = null;
   const revealed = new Map();
   let toastTimer = null;
 
@@ -310,6 +311,13 @@
 
     const done = [share?.ok === true, connected, nginxOk, connected].filter(Boolean).length;
     $("setup-progress").textContent = `${done}/4`;
+    // Open while there is still work to do, fold away once complete. Only
+    // react when the count changes so a manual toggle is not fought by the
+    // five-second refresh.
+    if (done !== lastSetupDone) {
+      $("setup").open = done < 4;
+      lastSetupDone = done;
+    }
   }
 
   function renderFriends() {
@@ -403,18 +411,25 @@
   function renderLinks() {
     const invite = selectedId ? findInvite(selectedId) : null;
     const links = state?.links;
+    // The three addresses are the same for every friend, so they stay on
+    // screen even before anyone is selected.
+    if (links) {
+      $("link-openai").textContent = links.openaiBase;
+      $("link-anthropic").textContent = links.anthropicBase;
+      $("link-remote").textContent = links.remoteMagpie;
+    }
     if (!invite || !links) {
       $("links-content").hidden = true;
       $("links-body").hidden = false;
+      $("links-body").textContent = links
+        ? "三条地址对所有朋友通用；点朋友名字查看 key 和接入示例。"
+        : "还没有可用的公网地址，先完成首次设置。";
       $("links-friend").textContent = "未选择朋友";
       return;
     }
     $("links-body").hidden = true;
     $("links-content").hidden = false;
     $("links-friend").textContent = `${invite.name}${invite.revoked ? "（已撤销）" : ""}`;
-    $("link-openai").textContent = links.openaiBase;
-    $("link-anthropic").textContent = links.anthropicBase;
-    $("link-remote").textContent = links.remoteMagpie;
     const shown = revealed.get(invite.id)?.secret;
     $("link-secret").textContent = shown || invite.secretMasked || "****";
     $("reveal-link-secret").textContent = shown ? "隐藏" : "显示";
@@ -573,11 +588,14 @@
     box.hidden = false;
   }
 
-  async function createFriend(event) {
-    event.preventDefault();
+  async function createFriend() {
     if (pending) return;
     const name = $("friend-name").value.trim();
-    if (!name) return;
+    if (!name) {
+      showToast("请先填写朋友的名字", true);
+      $("friend-name").focus();
+      return;
+    }
     const rawCost = $("friend-cost").value.trim();
     const period = $("friend-period").value;
     const body = { name, limit: { period } };
@@ -694,10 +712,19 @@
     });
     $("new-friend").addEventListener("click", () => {
       $("new-friend-form").hidden = !$("new-friend-form").hidden;
-      $("friend-name").focus();
+      if (!$("new-friend-form").hidden) $("friend-name").focus();
     });
     $("cancel-friend").addEventListener("click", () => { $("new-friend-form").hidden = true; });
-    $("new-friend-form").addEventListener("submit", createFriend);
+    // The plugin page runs in a sandbox without allow-forms, so a native
+    // form submit never fires. Create on an explicit click or Enter instead.
+    $("create-friend").addEventListener("click", createFriend);
+    for (const id of ["friend-name", "friend-cost", "friend-period"]) {
+      $(id).addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        createFriend();
+      });
+    }
     $("friends-list").addEventListener("click", handleFriendAction);
     $("refresh-usage").addEventListener("click", refreshUsage);
     $("copy-logs").addEventListener("click", () => copyText($("log-list").textContent || ""));

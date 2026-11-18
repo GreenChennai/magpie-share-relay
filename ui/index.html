@@ -39,8 +39,14 @@
     </dl>
   </section>
 
-  <section class="card" id="setup">
-    <div class="section-head"><h2>首次设置</h2><span class="muted small" id="setup-progress"></span></div>
+  <details class="card" id="setup" open>
+    <summary class="section-head">
+      <h2>首次设置</h2>
+      <span class="summary-meta">
+        <span class="muted small" id="setup-progress"></span>
+        <span class="chevron" aria-hidden="true"></span>
+      </span>
+    </summary>
     <ol class="steps">
       <li id="step-share"><span class="tick" data-tick>?</span>
         <div><strong>打开 magpie 的 Share on local network</strong>
@@ -74,15 +80,15 @@
       </li>
     </ol>
     <p class="error small" id="setup-error" hidden></p>
-  </section>
+  </details>
 
   <section class="card" id="friends">
     <div class="section-head">
       <h2>朋友</h2>
       <button type="button" id="new-friend">新建朋友</button>
     </div>
-    <form class="form" id="new-friend-form" hidden>
-      <input id="friend-name" placeholder="名字，如 Alice" autocomplete="off" required>
+    <div class="form" id="new-friend-form" hidden>
+      <input id="friend-name" placeholder="名字，如 Alice" autocomplete="off">
       <label class="small">限额
         <input id="friend-cost" type="number" min="0" step="0.5" value="5" inputmode="decimal">
       </label>
@@ -91,9 +97,9 @@
         <option value="week">每周</option>
         <option value="month">每月</option>
       </select>
-      <button type="submit">创建</button>
+      <button type="button" id="create-friend">创建</button>
       <button type="button" id="cancel-friend" class="ghost">取消</button>
-    </form>
+    </div>
     <div class="list" id="friends-list"><p class="muted">正在读取…</p></div>
     <p class="muted small" id="friends-note"></p>
   </section>
@@ -103,12 +109,16 @@
       <h2>链接</h2>
       <span class="muted small" id="links-friend">未选择朋友</span>
     </div>
-    <div id="links-body" class="muted">选择一位朋友的“复制两条链接”，或点名字查看。</div>
-    <div id="links-content" hidden>
+    <div id="links-endpoints">
       <dl class="links">
         <div><dt>OpenAI</dt><dd><code id="link-openai">—</code> <button type="button" data-copy="link-openai">复制</button></dd></div>
         <div><dt>Anthropic</dt><dd><code id="link-anthropic">—</code> <button type="button" data-copy="link-anthropic">复制</button></dd></div>
         <div><dt>Remote magpie</dt><dd><code id="link-remote">—</code> <button type="button" data-copy="link-remote">复制</button></dd></div>
+      </dl>
+    </div>
+    <p id="links-body" class="muted small">点朋友名字查看 key 和接入示例。</p>
+    <div id="links-content" hidden>
+      <dl class="links">
         <div><dt>Key</dt><dd><code id="link-secret">—</code>
           <button type="button" id="reveal-link-secret">显示</button>
           <button type="button" id="copy-link-secret">复制</button>
